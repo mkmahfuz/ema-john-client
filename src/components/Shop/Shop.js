@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import fakeData from '../../fakeData';
+//import fakeData from '../../fakeData';
 import { useState } from 'react';
 import './Shop.css';
 import Product from '../Product/Product';
@@ -8,20 +8,31 @@ import { addToDatabaseCart, getDatabaseCart } from '../../utilities/databaseMana
 import { Link } from 'react-router-dom';
 
 const Shop = () => {
-    const first10 = fakeData.slice(0,10);
-    const [products, setProducts] = useState(first10);
+    //const first10 = fakeData.slice(0,10);
+    const [products, setProducts] = useState([]);
     const [cart, setCart] = useState([]);
+
+    //for getting data from server 
+    useEffect(()=>{
+        const url = 'http://localhost:5000/products';
+        fetch(url)
+        .then(res=>res.json())
+        .then(data=>{
+            setProducts(data);
+
+        })
+    },[])
     
     useEffect(()=>{
         const savedCart = getDatabaseCart();
         const productKeys = Object.keys(savedCart);
         const previousCart = productKeys.map( existingKey => {
-            const product = fakeData.find( pd => pd.key === existingKey);
+            const product = products.find( pd => pd.key === existingKey);
             product.quantity = savedCart[existingKey];
             return product;
         } )
         setCart(previousCart);
-    }, [])
+    }, [products]) //dependecy products add kore dite hobe details from mod-48-4
 
     const handleAddProduct = (product) =>{
         const toBeAddedKey = product.key;
