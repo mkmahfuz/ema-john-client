@@ -13,39 +13,58 @@ const Shop = () => {
     const [cart, setCart] = useState([]);
 
     //for getting data from server 
-    useEffect(()=>{
+    useEffect(() => {
         const url = 'http://localhost:5000/products';
         fetch(url)
-        .then(res=>res.json())
-        .then(data=>{
-            setProducts(data);
+            .then(res => res.json())
+            .then(data => {
+                setProducts(data);
 
-        })
-    },[])
-    
-    useEffect(()=>{
+            })
+    }, [])
+
+    useEffect(() => {
         const savedCart = getDatabaseCart();
         const productKeys = Object.keys(savedCart);
-        const previousCart = productKeys.map( existingKey => {
-            const product = products.find( pd => pd.key === existingKey);
-            product.quantity = savedCart[existingKey];
-            return product;
-        } )
-        setCart(previousCart);
-    }, [products]) //dependecy products add kore dite hobe details from mod-48-4
+        //copied from review.js mod-48-5 8min25sec
+        //load data from mongo db
+        const url = 'http://localhost:5000/productsByKeys';
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productKeys)
+        })
+            .then(res => res.json())
+            .then(data => {
+                setCart(data);
+            })
 
-    const handleAddProduct = (product) =>{
+        //old code
+        // if(products.length>0){
+        //     const previousCart = productKeys.map( existingKey => {
+        //         const product = products.find( pd => pd.key === existingKey);
+        //         product.quantity = savedCart[existingKey];
+        //         return product;
+        //     } )
+        //     setCart(previousCart);
+
+        // }//old code
+
+    }, []) //dependecy products add kore dite hobe details from mod-48-4,
+    //then dependency sorai felsi mod-48-5: 8min25sec
+
+    const handleAddProduct = (product) => {
         const toBeAddedKey = product.key;
         const sameProduct = cart.find(pd => pd.key === toBeAddedKey);
         let count = 1;
         let newCart;
-        if(sameProduct){
+        if (sameProduct) {
             count = sameProduct.quantity + 1;
             sameProduct.quantity = count;
             const others = cart.filter(pd => pd.key !== toBeAddedKey);
             newCart = [...others, sameProduct];
         }
-        else{
+        else {
             product.quantity = 1;
             newCart = [...cart, product];
         }
@@ -57,22 +76,22 @@ const Shop = () => {
         <div className="twin-container">
             <div className="product-container">
                 {
-                    products.map(pd => <Product 
+                    products.map(pd => <Product
                         key={pd.key}
                         showAddToCart={true}
-                        handleAddProduct = {handleAddProduct}
+                        handleAddProduct={handleAddProduct}
                         product={pd}
-                        ></Product>)
+                    ></Product>)
                 }
             </div>
             <div className="cart-container">
-               <Cart cart={cart}>
+                <Cart cart={cart}>
                     <Link to="/review">
                         <button className="main-button">Review Order</button>
                     </Link>
-               </Cart>
+                </Cart>
             </div>
-            
+
         </div>
     );
 };

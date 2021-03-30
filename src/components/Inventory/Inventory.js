@@ -33,6 +33,7 @@ const Inventory = () => {
         <div>
             <button onClick={handleAddProduct}>AddProduct</button><br />
             <button onClick={handleAddAllProducts}>Add All Products</button><br />
+            
 
         </div>
     );

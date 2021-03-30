@@ -21,33 +21,48 @@ const Review = () => {
         removeFromDatabaseCart(productKey);
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         //cart
         const savedCart = getDatabaseCart();
         const productKeys = Object.keys(savedCart);
+        //load data from mongo db
+        const url = 'http://localhost:5000/productsByKeys';
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productKeys)
+        })
+            .then(res => res.json())
+            .then(data => {
+                setCart(data);
+            })
 
-        const cartProducts =  productKeys.map( key => {
-            const product = fakeData.find( pd => pd.key === key);
-            product.quantity = savedCart[key];
-            return product;
-        });
-        setCart(cartProducts);
+        //old code before db
+        // const cartProducts = productKeys.map(key => {
+        //     const product = fakeData.find(pd => pd.key === key);
+        //     product.quantity = savedCart[key];
+        //     return product;
+        // });
+        // setCart(cartProducts);
+        //old code before db 
+
+
     }, []);
 
     let thankyou;
-    if(orderPlaced){
-        thankyou = <img src={happyImage} alt=""/>
-    } 
+    if (orderPlaced) {
+        thankyou = <img src={happyImage} alt="" />
+    }
     return (
         <div className="twin-container">
             <div className="product-container">
                 {
-                    cart.map(pd => <ReviewItem 
+                    cart.map(pd => <ReviewItem
                         key={pd.key}
-                        removeProduct = {removeProduct}
+                        removeProduct={removeProduct}
                         product={pd}></ReviewItem>)
                 }
-                { thankyou }
+                {thankyou}
             </div>
             <div className="cart-container">
                 <Cart cart={cart}>
